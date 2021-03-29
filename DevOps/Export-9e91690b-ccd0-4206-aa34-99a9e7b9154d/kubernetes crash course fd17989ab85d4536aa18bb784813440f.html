@@ -1,0 +1,680 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>kubernetes crash course</title><style>
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC", "Songti SC", "SimSun", "Nanum Myeongjo", NanumMyeongjo, Batang, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC', 'Noto Sans CJK KR'; }
+
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC', 'Noto Sans Mono CJK KR'; }
+
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, YuMincho, "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC", "Songti SC", "SimSun", "Nanum Myeongjo", NanumMyeongjo, Batang, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC', 'Noto Sans CJK KR'; }
+
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC', 'Noto Sans Mono CJK KR'; }
+
+.highlight-default {
+}
+.highlight-gray {
+	color: rgb(155,154,151);
+}
+.highlight-brown {
+	color: rgb(100,71,58);
+}
+.highlight-orange {
+	color: rgb(217,115,13);
+}
+.highlight-yellow {
+	color: rgb(223,171,1);
+}
+.highlight-teal {
+	color: rgb(15,123,108);
+}
+.highlight-blue {
+	color: rgb(11,110,153);
+}
+.highlight-purple {
+	color: rgb(105,64,165);
+}
+.highlight-pink {
+	color: rgb(173,26,114);
+}
+.highlight-red {
+	color: rgb(224,62,62);
+}
+.highlight-gray_background {
+	background: rgb(235,236,237);
+}
+.highlight-brown_background {
+	background: rgb(233,229,227);
+}
+.highlight-orange_background {
+	background: rgb(250,235,221);
+}
+.highlight-yellow_background {
+	background: rgb(251,243,219);
+}
+.highlight-teal_background {
+	background: rgb(221,237,234);
+}
+.highlight-blue_background {
+	background: rgb(221,235,241);
+}
+.highlight-purple_background {
+	background: rgb(234,228,242);
+}
+.highlight-pink_background {
+	background: rgb(244,223,235);
+}
+.highlight-red_background {
+	background: rgb(251,228,228);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(55, 53, 47, 0.6);
+	fill: rgba(55, 53, 47, 0.6);
+}
+.block-color-brown {
+	color: rgb(100,71,58);
+	fill: rgb(100,71,58);
+}
+.block-color-orange {
+	color: rgb(217,115,13);
+	fill: rgb(217,115,13);
+}
+.block-color-yellow {
+	color: rgb(223,171,1);
+	fill: rgb(223,171,1);
+}
+.block-color-teal {
+	color: rgb(15,123,108);
+	fill: rgb(15,123,108);
+}
+.block-color-blue {
+	color: rgb(11,110,153);
+	fill: rgb(11,110,153);
+}
+.block-color-purple {
+	color: rgb(105,64,165);
+	fill: rgb(105,64,165);
+}
+.block-color-pink {
+	color: rgb(173,26,114);
+	fill: rgb(173,26,114);
+}
+.block-color-red {
+	color: rgb(224,62,62);
+	fill: rgb(224,62,62);
+}
+.block-color-gray_background {
+	background: rgb(235,236,237);
+}
+.block-color-brown_background {
+	background: rgb(233,229,227);
+}
+.block-color-orange_background {
+	background: rgb(250,235,221);
+}
+.block-color-yellow_background {
+	background: rgb(251,243,219);
+}
+.block-color-teal_background {
+	background: rgb(221,237,234);
+}
+.block-color-blue_background {
+	background: rgb(221,235,241);
+}
+.block-color-purple_background {
+	background: rgb(234,228,242);
+}
+.block-color-pink_background {
+	background: rgb(244,223,235);
+}
+.block-color-red_background {
+	background: rgb(251,228,228);
+}
+.select-value-color-default { background-color: rgba(206,205,202,0.5); }
+.select-value-color-gray { background-color: rgba(155,154,151, 0.4); }
+.select-value-color-brown { background-color: rgba(140,46,0,0.2); }
+.select-value-color-orange { background-color: rgba(245,93,0,0.2); }
+.select-value-color-yellow { background-color: rgba(233,168,0,0.2); }
+.select-value-color-green { background-color: rgba(0,135,107,0.2); }
+.select-value-color-blue { background-color: rgba(0,120,223,0.2); }
+.select-value-color-purple { background-color: rgba(103,36,222,0.2); }
+.select-value-color-pink { background-color: rgba(221,0,129,0.2); }
+.select-value-color-red { background-color: rgba(255,0,26,0.2); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="40d4f497-30d9-445e-8ee6-c84c6dc59837" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">👨🏻‍💻</span></div><h1 class="page-title">kubernetes crash course</h1><table class="properties"><tbody><tr class="property-row property-row-checkbox"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesCheckbox"><path d="M0,3 C0,1.34314 1.34326,0 3,0 L11,0 C12.6567,0 14,1.34314 14,3 L14,11 C14,12.6569 12.6567,14 11,14 L3,14 C1.34326,14 0,12.6569 0,11 L0,3 Z M3,1.5 C2.17139,1.5 1.5,2.17157 1.5,3 L1.5,11 C1.5,11.8284 2.17139,12.5 3,12.5 L11,12.5 C11.8286,12.5 12.5,11.8284 12.5,11 L12.5,3 C12.5,2.17157 11.8286,1.5 11,1.5 L3,1.5 Z M2.83252,6.8161 L3.39893,6.27399 L3.57617,6.10425 L3.92334,5.77216 L4.26904,6.10559 L4.44531,6.27582 L5.58398,7.37402 L9.28271,3.81073 L9.45996,3.64008 L9.80664,3.3056 L10.1538,3.63989 L10.3311,3.81067 L10.8936,4.35303 L11.0708,4.52399 L11.4434,4.88379 L11.0708,5.24353 L10.8936,5.41437 L6.1084,10.0291 L5.93115,10.2 L5.58398,10.5344 L5.23682,10.2 L5.05957,10.0292 L2.83057,7.87946 L2.65283,7.70801 L2.27832,7.34674 L2.6543,6.98694 L2.83252,6.8161 Z"></path></svg></span>Code</th><td><div class="checkbox checkbox-on"></div></td></tr><tr class="property-row property-row-created_time"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesCreatedAt"><path d="M6.98643729,14.0000972 C5.19579566,14.0000972 3.40419152,13.3106896 2.04245843,11.9323606 C-0.681017475,9.21200555 -0.680780251,4.76029539 2.04293482,2.04012507 C4.76664406,-0.68004331 9.22427509,-0.68004331 11.9480135,2.04013479 C13.272481,3.36277455 14,5.1330091 14,6.99552762 C14,8.87640182 13.2721894,10.6285043 11.9480135,11.9509302 C10.5679344,13.3105924 8.77756503,14.0000972 6.98643729,14.0000972 Z M10.2705296,7.00913883 L10.2705296,8.46099754 L10.2705296,8.65543362 L10.076181,8.65543362 L8.6543739,8.65543362 L5.72059514,8.65543362 L5.52619796,8.65543362 L5.52619796,8.46099754 L5.52619796,5.52541044 L5.52619796,3.37946773 L5.52619796,3.18502193 L5.72059514,3.18502193 L7.17253164,3.18502193 L7.36692883,3.18502193 L7.36692883,3.37946773 L7.36692883,6.81467358 L10.076181,6.81467358 L10.2705296,6.81467358 L10.2705296,7.00913883 Z M12.1601539,6.99552762 C12.1601539,5.61697497 11.6190112,4.32597154 10.6393933,3.34769528 C8.63253764,1.34336744 5.35197452,1.34061603 3.34153136,3.33944106 C3.33868273,3.34219247 3.33607716,3.34494388 3.33322852,3.34769528 C1.32397148,5.35459953 1.32372842,8.63641682 3.33322852,10.6433794 C5.34295224,12.6504489 8.62968901,12.6504489 10.6393933,10.6433794 C11.6190112,9.66506426 12.1601539,8.37408027 12.1601539,6.99552762 Z"></path></svg></span>Created</th><td><time>@Mar 21, 2021 3:52 PM</time></td></tr><tr class="property-row property-row-select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesSelect"><path d="M7,13 C10.31348,13 13,10.31371 13,7 C13,3.68629 10.31348,1 7,1 C3.68652,1 1,3.68629 1,7 C1,10.31371 3.68652,13 7,13 Z M3.75098,5.32278 C3.64893,5.19142 3.74268,5 3.90869,5 L10.09131,5 C10.25732,5 10.35107,5.19142 10.24902,5.32278 L7.15771,9.29703 C7.07764,9.39998 6.92236,9.39998 6.84229,9.29703 L3.75098,5.32278 Z"></path></svg></span>Importance</th><td><span class="selected-value select-value-color-red">very important</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesMultipleSelect"><path d="M4,3 C4,2.447715 4.447715,2 5,2 L12,2 C12.5523,2 13,2.447716 13,3 C13,3.55228 12.5523,4 12,4 L5,4 C4.447715,4 4,3.55228 4,3 Z M4,7 C4,6.447715 4.447715,6 5,6 L12,6 C12.5523,6 13,6.447716 13,7 C13,7.55228 12.5523,8 12,8 L5,8 C4.447715,8 4,7.55228 4,7 Z M4,11 C4,10.447715 4.447715,10 5,10 L12,10 C12.5523,10 13,10.447716 13,11 C13,11.55228 12.5523,12 12,12 L5,12 C4.447715,12 4,11.55228 4,11 Z M2,4 C1.44771525,4 1,3.55228475 1,3 C1,2.44771525 1.44771525,2 2,2 C2.55228475,2 3,2.44771525 3,3 C3,3.55228475 2.55228475,4 2,4 Z M2,8 C1.44771525,8 1,7.55228475 1,7 C1,6.44771525 1.44771525,6 2,6 C2.55228475,6 3,6.44771525 3,7 C3,7.55228475 2.55228475,8 2,8 Z M2,12 C1.44771525,12 1,11.5522847 1,11 C1,10.4477153 1.44771525,10 2,10 C2.55228475,10 3,10.4477153 3,11 C3,11.5522847 2.55228475,12 2,12 Z"></path></svg></span>Language</th><td></td></tr><tr class="property-row property-row-url"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesUrl"><path d="M3.73333,3.86667 L7.46667,3.86667 C8.49613,3.86667 9.33333,4.70387 9.33333,5.73333 C9.33333,6.7628 8.49613,7.6 7.46667,7.6 L6.53333,7.6 C6.01813,7.6 5.6,8.0186 5.6,8.53333 C5.6,9.04807 6.01813,9.46667 6.53333,9.46667 L7.46667,9.46667 C9.5284,9.46667 11.2,7.79507 11.2,5.73333 C11.2,3.6716 9.5284,2 7.46667,2 L3.73333,2 C1.6716,2 0,3.6716 0,5.73333 C0,7.124 0.762067,8.33453 1.88953,8.97713 C1.87553,8.83107 1.86667,8.6836 1.86667,8.53333 C1.86667,7.92013 1.98753,7.33447 2.2036,6.7978 C1.99267,6.4954 1.86667,6.12953 1.86667,5.73333 C1.86667,4.70387 2.70387,3.86667 3.73333,3.86667 Z M12.1095,5.28907 C12.1231,5.4356 12.1333,5.58307 12.1333,5.73333 C12.1333,6.34607 12.0101,6.9294 11.7931,7.46513 C12.0059,7.768 12.1333,8.13573 12.1333,8.53333 C12.1333,9.5628 11.2961,10.4 10.2667,10.4 L6.53333,10.4 C5.50387,10.4 4.66667,9.5628 4.66667,8.53333 C4.66667,7.50387 5.50387,6.66667 6.53333,6.66667 L7.46667,6.66667 C7.98187,6.66667 8.4,6.24807 8.4,5.73333 C8.4,5.2186 7.98187,4.8 7.46667,4.8 L6.53333,4.8 C4.4716,4.8 2.8,6.4716 2.8,8.53333 C2.8,10.59507 4.4716,12.2667 6.53333,12.2667 L10.2667,12.2667 C12.3284,12.2667 14,10.59507 14,8.53333 C14,7.14267 13.2375,5.93167 12.1095,5.28907 Z"></path></svg></span>Materials</th><td><a href="https://www.youtube.com/watch?v=X48VuDVv0do" class="url-value">https://www.youtube.com/watch?v=X48VuDVv0do</a></td></tr><tr class="property-row property-row-checkbox"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesCheckbox"><path d="M0,3 C0,1.34314 1.34326,0 3,0 L11,0 C12.6567,0 14,1.34314 14,3 L14,11 C14,12.6569 12.6567,14 11,14 L3,14 C1.34326,14 0,12.6569 0,11 L0,3 Z M3,1.5 C2.17139,1.5 1.5,2.17157 1.5,3 L1.5,11 C1.5,11.8284 2.17139,12.5 3,12.5 L11,12.5 C11.8286,12.5 12.5,11.8284 12.5,11 L12.5,3 C12.5,2.17157 11.8286,1.5 11,1.5 L3,1.5 Z M2.83252,6.8161 L3.39893,6.27399 L3.57617,6.10425 L3.92334,5.77216 L4.26904,6.10559 L4.44531,6.27582 L5.58398,7.37402 L9.28271,3.81073 L9.45996,3.64008 L9.80664,3.3056 L10.1538,3.63989 L10.3311,3.81067 L10.8936,4.35303 L11.0708,4.52399 L11.4434,4.88379 L11.0708,5.24353 L10.8936,5.41437 L6.1084,10.0291 L5.93115,10.2 L5.58398,10.5344 L5.23682,10.2 L5.05957,10.0292 L2.83057,7.87946 L2.65283,7.70801 L2.27832,7.34674 L2.6543,6.98694 L2.83252,6.8161 Z"></path></svg></span>Reviewed</th><td><div class="checkbox checkbox-off"></div></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesMultipleSelect"><path d="M4,3 C4,2.447715 4.447715,2 5,2 L12,2 C12.5523,2 13,2.447716 13,3 C13,3.55228 12.5523,4 12,4 L5,4 C4.447715,4 4,3.55228 4,3 Z M4,7 C4,6.447715 4.447715,6 5,6 L12,6 C12.5523,6 13,6.447716 13,7 C13,7.55228 12.5523,8 12,8 L5,8 C4.447715,8 4,7.55228 4,7 Z M4,11 C4,10.447715 4.447715,10 5,10 L12,10 C12.5523,10 13,10.447716 13,11 C13,11.55228 12.5523,12 12,12 L5,12 C4.447715,12 4,11.55228 4,11 Z M2,4 C1.44771525,4 1,3.55228475 1,3 C1,2.44771525 1.44771525,2 2,2 C2.55228475,2 3,2.44771525 3,3 C3,3.55228475 2.55228475,4 2,4 Z M2,8 C1.44771525,8 1,7.55228475 1,7 C1,6.44771525 1.44771525,6 2,6 C2.55228475,6 3,6.44771525 3,7 C3,7.55228475 2.55228475,8 2,8 Z M2,12 C1.44771525,12 1,11.5522847 1,11 C1,10.4477153 1.44771525,10 2,10 C2.55228475,10 3,10.4477153 3,11 C3,11.5522847 2.55228475,12 2,12 Z"></path></svg></span>context</th><td><span class="selected-value select-value-color-purple">DevOps</span><span class="selected-value select-value-color-default">kubernetes</span></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><svg viewBox="0 0 14 14" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.4);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesMultipleSelect"><path d="M4,3 C4,2.447715 4.447715,2 5,2 L12,2 C12.5523,2 13,2.447716 13,3 C13,3.55228 12.5523,4 12,4 L5,4 C4.447715,4 4,3.55228 4,3 Z M4,7 C4,6.447715 4.447715,6 5,6 L12,6 C12.5523,6 13,6.447716 13,7 C13,7.55228 12.5523,8 12,8 L5,8 C4.447715,8 4,7.55228 4,7 Z M4,11 C4,10.447715 4.447715,10 5,10 L12,10 C12.5523,10 13,10.447716 13,11 C13,11.55228 12.5523,12 12,12 L5,12 C4.447715,12 4,11.55228 4,11 Z M2,4 C1.44771525,4 1,3.55228475 1,3 C1,2.44771525 1.44771525,2 2,2 C2.55228475,2 3,2.44771525 3,3 C3,3.55228475 2.55228475,4 2,4 Z M2,8 C1.44771525,8 1,7.55228475 1,7 C1,6.44771525 1.44771525,6 2,6 C2.55228475,6 3,6.44771525 3,7 C3,7.55228475 2.55228475,8 2,8 Z M2,12 C1.44771525,12 1,11.5522847 1,11 C1,10.4477153 1.44771525,10 2,10 C2.55228475,10 3,10.4477153 3,11 C3,11.5522847 2.55228475,12 2,12 Z"></path></svg></span>source</th><td><span class="selected-value select-value-color-default">YT</span></td></tr></tbody></table></header><div class="page-body"><ul id="a985ef17-2b99-4f5d-8b77-5b8e542aa787" class="toggle"><li><details open=""><summary>table of content</summary><nav id="69305eda-4274-4f81-955f-c9f8a149c9eb" class="block-color-gray table_of_contents"><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#60298bbf-b75c-4e34-a94e-242d0907ec1d">intro</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#0be34690-db49-45ab-bf04-9b2e0321b51d">cons</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#e3e22b84-ee01-4e8b-9ec1-d4b369f4a05f">k8s components</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#a18ed43f-9688-429f-95a2-a661c2f68b37">pod</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#46f8e915-37d2-41fe-84e8-a53b17983a97">service</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#d8b01839-50dc-48aa-92fa-72fbe3197eb4">external service</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#6f6a2abd-3d49-41bb-812b-d8e647719bc4">ingress</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#d1d9d815-4f4a-4ae0-8a73-d25e1c8ab212">configmap:</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#aad827e0-5f59-410c-a8b8-da5520840741">secret:</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#27229c29-6bbb-423e-9916-aad7466650c0">volumes</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#25565b7c-8591-462e-9bb5-e69f79dfaa54">replica</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#fdc5a26c-09fc-452c-8de6-6c16f101c0dc">Deployment:</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#91a27af7-c010-49cc-94c9-9d3e06f22d75">statefulSet:</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#044ca9ca-657e-4f0c-b647-487f6c469444">K8S Architecture</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#61843c7e-0e98-4504-b78d-8731724be0c8">worker machine</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#3c1fc8a5-a446-4da6-9e3a-b6380c04df2c">3 processes must be installed on each node</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#a074b133-7901-477e-b5b4-3d3674d7d840">kubelet</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#676ea318-0362-4a93-9b95-7b7a3b5b1154">container runtime</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#b778d0df-3567-4fd1-ab52-14463910313a">kubeproxy</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#e7779d7a-c96d-4a0d-8c49-f3bb600e4167">how to interact with cluster</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#096d6779-c207-4273-b03c-8fa48c9dc9ad">master node</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#edc30b5f-b691-4495-915d-b6fe67627f03">1 - api server</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#460ea62e-cc7e-462c-8229-a7778895a4c8">2 - scheduler</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#17c15928-dfd5-44fb-9916-e60ac0bd113a">3 - controller manager</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#87eea6bc-0466-4a6a-8dc8-8f6a8f986143">4 - etcd(cluster brain)</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#25a26e98-ca74-48dc-9cf2-bfa50aa76ddd">we can multiple master nodes</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#d27f78f7-3ff4-4b69-b1ad-ea9ee3061902">example cluster</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#7f658d25-d631-4363-b692-76fda470acb9">MiniKube</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#b5446f3c-2c67-49bc-9bf8-37cc4cf1c3cd">kubectl</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#054ef78a-424c-4b2b-9a32-c901b6c9e5bb">minikube installation on ubuntu</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#7c986494-70a5-4c15-bae9-589f93be87db">kubectl basic commands</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#8980c8d5-77e9-4009-8cba-2a0ec485c7de">create</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#8ee7b259-7eda-4dc2-b895-b2522d060ffc"><a href="https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-zsh/">configure kubectl with zsh</a></a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#34926765-ef94-4bc6-80ac-8a1b8ea3a0f5">example</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#31639259-1165-4889-8ea4-d8bc72e89d08">layers of abstractions</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#c65997bf-9e63-4a3a-9307-5f7d7cff55ae">debugging pods</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#c806f252-9f8f-4171-8da0-23aedd87f716">delete deployment and apply config file</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#879bbf6c-f93a-4722-b4a4-f1a5fb6f6ac1">we deal with files for config </a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#e57c5271-0dae-4c4c-805d-1bee35b3e9c1">summary </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#41fc14d5-77fd-4733-938b-8574a07acb6c">YAML config files</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#2a8f5eaa-6529-4739-a0a2-35b11095fb79">we have types for secrets</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#28420c03-80c8-45a4-9531-a0f837a2a491">organizing components using namespaces</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#c6ebadc8-67d0-46ad-9b19-435695295219">create namespace</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#841b0763-01e3-423e-94a0-03edd19e8bc1">why use namespace ?</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#218ef5cc-d5b7-440f-9a7d-076ddc0378d5">characterestics </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#ac90a40a-fda2-46db-a643-30e6dc646274">create components in namespace</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#be0cc351-2145-4e49-81a1-a7b171c757db">K8S ingress</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#6f4dd4d2-f692-4b94-a862-3f511a1a1a14">minikube config</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#81d40dda-f089-4f85-bd46-649087589288">HELM</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#f3480db6-6c61-44e7-8e68-42e633579e88">helm chart structure</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#f2d082da-2350-4218-886d-c0b5c0f20b48">k8s Volumes</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#a33661de-82cc-4169-b0b2-d46cc25ad2ff">local vs remote  volume</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#d7a0e287-887c-4bf4-93c5-a4c954dc85b0">who creates and when ?</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#905aaf21-082a-4bf8-96a3-2ccf709af964">storage class</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#b3cff70f-896d-4798-8e76-e8f34e9b80ba">statefulSet for stateful applications</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#3c500380-e6b8-4576-904a-51229d15e733">k8s services</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#45aa1810-1c1b-40cf-92f6-99689438b61b">what and why ?</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#e4db47b0-33c0-48b7-8988-6f20e77da40e">clusterIP services</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#59bddae3-a567-4f29-a618-d5a406e95fff">service communication : selector</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#822ddbfb-4242-4ac7-86c1-e2f46bff3172">multiple port services</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#a95114e8-cc39-4a2b-9f36-b9141e4b99e9">headless service</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#da288a47-bf57-4889-ba97-9a6d136acf95">NodePort service</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#9c0aa582-0e9d-4d28-90d1-1f63fd18a7f9">load Balancer service</a></div></nav></details></li></ul><h1 id="60298bbf-b75c-4e34-a94e-242d0907ec1d" class="">intro</h1><p id="e34c815c-c841-416c-b52c-5868182f38d0" class="">orchestration tool for containers</p><h1 id="0be34690-db49-45ab-bf04-9b2e0321b51d" class="">cons</h1><div id="5f7f4099-a0b8-48fd-8ee4-30a22fc79f4b" class="column-list"><div id="7dad6ab1-d4e1-4e5d-bb47-6ed6c359fea2" style="width:33.333333333333336%" class="column"><ul id="88f5457b-d0db-42f9-aaaa-cbda20acd4f7" class="bulleted-list"><li>high availablity or no down time</li></ul></div><div id="3ed06665-8708-4fd5-b280-4980d4771648" style="width:33.333333333333336%" class="column"><ul id="63f8c287-5142-49c0-bd24-2f511d1053ed" class="bulleted-list"><li>scalability</li></ul></div><div id="46a735da-a95c-426b-aa38-7b29e617326c" style="width:33.33333333333333%" class="column"><ul id="1e03762f-8616-4f69-9eed-a297939b7294" class="bulleted-list"><li>disaster recovery</li></ul></div></div><h1 id="e3e22b84-ee01-4e8b-9ec1-d4b369f4a05f" class="">k8s components</h1><h2 id="a18ed43f-9688-429f-95a2-a661c2f68b37" class="">pod</h2><ul id="fb5b5280-2b93-43ae-8e7a-356635d64fad" class="bulleted-list"><li>smallest unit of k8s, is an abstraction over container</li></ul><ul id="093eaedd-d83c-4d9a-899a-e91029711a20" class="bulleted-list"><li>usually 1 app per pod </li></ul><ul id="1588af4b-ddde-4bf8-90d3-9118b8909855" class="bulleted-list"><li>each pod has its own ip</li></ul><ul id="893742e0-5819-48da-902f-2215b27acb33" class="bulleted-list"><li>new ip address on re-creation </li></ul><h2 id="46f8e915-37d2-41fe-84e8-a53b17983a97" class="">service</h2><ul id="ff405e86-37f9-416c-90e0-1d55720260b9" class="bulleted-list"><li>permanent ip address can be attached to each pod</li></ul><ul id="cfecc557-f7e3-4d5a-8b22-8d59d0eba696" class="bulleted-list"><li>lifecycle of pod and service are not connected</li></ul><ul id="797dc59b-dc2d-4b6a-85db-2903297fac35" class="bulleted-list"><li>if pod dies service and ip stay</li></ul><h3 id="d8b01839-50dc-48aa-92fa-72fbe3197eb4" class="">external service</h3><p id="1b3f8126-c940-4513-90d0-b397b505f617" class="">internal service</p><h2 id="6f6a2abd-3d49-41bb-812b-d8e647719bc4" class="">ingress</h2><p id="97078b16-72cd-4ed3-91c7-eb930d42d76b" class="">forward requests to services</p><h2 id="d1d9d815-4f4a-4ae0-8a73-d25e1c8ab212" class="">configmap:</h2><ul id="a6e7d605-4929-4f8a-b45e-a7329e8214f9" class="bulleted-list"><li>external conf of your app</li></ul><ul id="f6994dbe-0cd7-4427-bea5-02671c46fc17" class="bulleted-list"><li>dont put credentials ⚠️</li></ul><h2 id="aad827e0-5f59-410c-a8b8-da5520840741" class="">secret:</h2><ul id="71077c5a-e9d8-4d8d-b1ec-e70647a84913" class="bulleted-list"><li>like configmap but used for secrets</li></ul><ul id="eece4885-4e7e-4e22-83c9-7143021fb3bd" class="bulleted-list"><li>used to store secret data</li></ul><ul id="12234cac-7d3f-4716-b8f8-69ff1390a8cd" class="bulleted-list"><li>encoded in base64 </li></ul><ul id="a056dd24-9200-4eb6-b454-1fe5ee9e0591" class="bulleted-list"><li>⚠️ ‼️ built-in securtiy mechanism is not enabled by default</li></ul><ul id="42d5ca51-e684-41a1-8262-6b1f158dd198" class="bulleted-list"><li>used data from <code>secret:</code> or <code>configmap:</code> as env variables or properties file </li></ul><h2 id="27229c29-6bbb-423e-9916-aad7466650c0" class="">volumes</h2><p id="cb7b0a66-a1b6-45df-860b-190b3ea14c86" class="">we can attach either local or remote (outside k8s cluster)</p><p id="c7757b6c-a945-4b7b-9386-eb63a5886969" class="">k8s doesn&#x27;t manage data persistence you have to manage it explicitly using volumes
+</p><h2 id="25565b7c-8591-462e-9bb5-e69f79dfaa54" class="">replica</h2><div id="d93690e6-ac00-47b8-afb9-fd2f35197e76" class="column-list"><div id="f87ce387-8449-4e23-8c4c-d64a84f7bdd3" style="width:50%" class="column"><ul id="e8be0abb-b247-4244-9abe-2bfaacd273a0" class="bulleted-list"><li>connected to the same service, another node but same service</li></ul></div><div id="d7668c46-740e-4fb0-a3f3-cebc9caf16e1" style="width:50%" class="column"><ul id="4b0a6c32-3bb2-4212-b819-4314b3de983b" class="bulleted-list"><li>service is also load balancer</li></ul></div></div><h2 id="fdc5a26c-09fc-452c-8de6-6c16f101c0dc" class="">Deployment:</h2><div id="8c2d9ba2-8c73-43f8-83dc-84c82b9fd350" class="column-list"><div id="b78e158f-092d-40e0-99cc-ab2ebc839881" style="width:50%" class="column"><ul id="b81d38ec-093f-4faa-8634-2832d1eaffe3" class="bulleted-list"><li>you wont create replica for pod but you will define blueprint for the pod which contains how many replica</li></ul></div><div id="c2ba9735-29c7-44d2-9b5b-a5b41a405503" style="width:50%" class="column"><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="f001fbfe-e103-4aeb-a2cd-1aa72f676873"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%"><mark class="highlight-red">stateless</mark>
+</div></figure></div></div><h2 id="91a27af7-c010-49cc-94c9-9d3e06f22d75" class="">statefulSet:</h2><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="62419b2a-385f-44ac-9966-62c970a8512c"><div style="font-size:1.5em"><span class="icon">💡</span></div><div style="width:100%">we need DB replica too 
+but we can&#x27;t do this using Deployment becuase it has a state (its data)</div></figure><ul id="4ad65f3b-9c2f-4478-b210-bf1e575da035" class="toggle"><li><details open=""><summary>for statefull apps</summary><ul id="a550dced-647d-4e46-8d61-b1a72171f0dd" class="bulleted-list"><li>mysql</li></ul><ul id="7059dd4f-8808-4f9a-9270-30aa754b3fc2" class="bulleted-list"><li>elastic search</li></ul><ul id="8e225270-4ddb-49d5-bc91-897f44df3596" class="bulleted-list"><li>mongo DB</li></ul><ul id="953b21c2-c069-4bee-82ca-7cd03e3ea3c4" class="bulleted-list"><li>etc.</li></ul></details></li></ul><ul id="97cb38a0-21f7-4256-b01c-7d460ff0c611" class="bulleted-list"><li>deploying <code>statefulSet</code> not easy</li></ul><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="23a13690-e40d-416b-962f-6531ac86682a"><div style="font-size:1.5em"><span class="icon">💡</span></div><div style="width:100%">DB are often hosted outside of K8S cluster</div></figure><h1 id="044ca9ca-657e-4f0c-b647-487f6c469444" class="">K8S Architecture</h1><h2 id="61843c7e-0e98-4504-b78d-8731724be0c8" class="">worker machine</h2><div id="bb31b32a-996f-4515-a894-54daaef0ac68" class="column-list"><div id="43f07159-ccb6-46fb-9922-b62f7afd0dcb" style="width:33.333333333333336%" class="column"><ul id="5ff86662-8e2c-4687-a203-f14f6dbd436a" class="bulleted-list"><li>node - or server-</li></ul></div><div id="58776c2e-0ab1-4970-a73e-9b1589a457d9" style="width:33.333333333333336%" class="column"><ul id="0c7f5786-dd4d-4596-b317-3ed4cfa2c61b" class="bulleted-list"><li>each node has multiple pods</li></ul></div><div id="6d981fd0-8ffb-4d09-a6eb-a7f12b488e8c" style="width:33.33333333333333%" class="column"><ul id="c8b2c434-8407-4ecf-8df1-c76e17d08fe8" class="bulleted-list"><li>worker do the actual work</li></ul></div></div><h2 id="3c1fc8a5-a446-4da6-9e3a-b6380c04df2c" class="">3 processes must be installed on each node</h2><h3 id="a074b133-7901-477e-b5b4-3d3674d7d840" class="">kubelet</h3><div id="f1914c5b-59f3-4684-9054-340e73859caf" class="column-list"><div id="2850fe1e-dd0d-457b-81e3-9686c06ba6b9" style="width:20.833333333333332%" class="column"><ul id="91a843c2-f8b9-451f-abb9-5f17a3bfb6ef" class="bulleted-list"><li>process of k8s itself</li></ul></div><div id="765c02f5-7f0f-4c1e-87d8-829e04ebb815" style="width:25%" class="column"><ul id="c6956626-f427-4ae8-b655-0e57b79c2341" class="bulleted-list"><li>interact with node and pods</li></ul></div><div id="3b9a6f6e-5ac3-409a-9033-908dd7f511e7" style="width:54.16666666666667%" class="column"><ul id="d634fbe6-9f83-4eb4-8805-f02c3cf1f650" class="bulleted-list"><li>take the config and run the pod inside and assign resources for pods</li></ul></div></div><h3 id="676ea318-0362-4a93-9b95-7b7a3b5b1154" class="">container runtime</h3><ul id="e6159cd3-3255-4f4a-8538-69fc6d396c5a" class="bulleted-list"><li>docker for example</li></ul><h3 id="b778d0df-3567-4fd1-ab52-14463910313a" class="">kubeproxy</h3><div id="d190df61-781b-4abb-a346-5a64943359ad" class="column-list"><div id="104bffae-f7df-478b-bf66-080a53506567" style="width:25%" class="column"><ul id="c13da601-b14e-481d-9571-100681097e0a" class="bulleted-list"><li>foward the requests</li></ul></div><div id="80ff188c-7312-4622-b4af-0ed42dd8bb9e" style="width:75%" class="column"><ul id="667ca419-efd5-416a-8af2-d588e5dc4773" class="bulleted-list"><li>has intellegient forward logic to make it good performance</li></ul></div></div><h1 id="e7779d7a-c96d-4a0d-8c49-f3bb600e4167" class="">how to interact with cluster</h1><h2 id="096d6779-c207-4273-b03c-8fa48c9dc9ad" class="">master node</h2><p id="707ba02b-a5a1-430b-9f9e-9f15aed54881" class="">master processes </p><p id="1c2f2b5a-731c-462b-948d-7a40f3f9f4da" class="">
+</p><h3 id="edc30b5f-b691-4495-915d-b6fe67627f03" class="">1 - api server</h3><div id="fa06e530-5c36-4d39-bdd6-130a9a6b35a8" class="column-list"><div id="4f60a385-6d66-43c8-a115-74eb18641404" style="width:33.333333333333336%" class="column"><ul id="5b8611a5-e715-4cd1-8ea4-02192914d76a" class="block-color-gray_background bulleted-list"><li>cluster gateway</li></ul></div><div id="bfd61c09-3d5d-43e7-9f8c-057eecf8bf59" style="width:33.333333333333336%" class="column"><ul id="4a340b9c-35ad-45e8-aaca-8588f5af0e8b" class="bulleted-list"><li>acts as a gateway for authentication</li></ul></div><div id="ec630d8e-ae25-4ac4-a425-d521c659e9f7" style="width:33.33333333333333%" class="column"><ul id="e9d90047-4e4f-409d-9b24-63a2779e5f98" class="bulleted-list"><li>only 1 entrypoint to the cluster</li></ul></div></div><ul id="a9378608-238c-4255-8c64-3bc519f6791a" class="toggle"><li><details open=""><summary><mark class="highlight-red"><strong>slide</strong></mark></summary><figure id="fd17989a-b85d-4536-aa18-bb784813440f" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled.png"/></a></figure></details></li></ul><h3 id="460ea62e-cc7e-462c-8229-a7778895a4c8" class="">2 - scheduler</h3><ul id="4281164e-207e-460d-a64f-4462bf03ea61" class="toggle"><li><details open=""><summary><strong><mark class="highlight-red">slide</mark></strong></summary><figure id="bd41704e-8a00-442f-91cf-3eac76044bd8" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%201.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%201.png"/></a></figure></details></li></ul><h3 id="17c15928-dfd5-44fb-9916-e60ac0bd113a" class="">3 - controller manager</h3><h3 id="87eea6bc-0466-4a6a-8dc8-8f6a8f986143" class="">4 - etcd(cluster brain)</h3><p id="6ffd63df-9269-4d48-ba47-2d9362d22e8f" class="">application data not stored in etcd </p><ul id="45e9ce0d-0bc3-4bcf-b87b-cb4552579cd9" class="toggle"><li><details open=""><summary><strong><mark class="highlight-red">slide</mark></strong></summary><figure id="ba6cda38-c625-4590-8252-d9a418d9e349" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%202.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%202.png"/></a></figure></details></li></ul><p id="e700f535-94a0-4619-b02b-628b4b47579a" class="">
+</p><h2 id="25a26e98-ca74-48dc-9cf2-bfa50aa76ddd" class="">we can multiple master nodes</h2><div id="357ee279-65bb-4817-b6eb-bd71815d4cfb" class="column-list"><div id="8c967aa7-935b-4f9e-87ba-ff1ba084a078" style="width:33.333333333333336%" class="column"><ul id="32ff83d4-6b36-4c6b-8fbc-0452d0de5cf4" class="bulleted-list"><li>which have its master processes</li></ul></div><div id="4eceb521-caa2-46a8-9f5c-9a2fc1a12f5a" style="width:33.333333333333336%" class="column"><ul id="278189cc-e7ff-461c-a3f5-e5896ee22109" class="bulleted-list"><li>api server is load balanced</li></ul></div><div id="5de14b90-66a9-4cef-bdf6-09fcbeffa4d9" style="width:33.33333333333333%" class="column"><ul id="f02b8c1b-2b62-4c25-b079-83e30674e753" class="bulleted-list"><li>etcd is distributed storage accross all master nodes</li></ul></div></div><ul id="41643544-34ba-46a7-95ae-3c80fcc27226" class="toggle"><li><details open=""><summary><mark class="highlight-red"><span style="border-bottom:0.05em solid"><strong>slide</strong></span></mark></summary><figure id="000a898c-8fc8-4a85-bec3-bcda7d67f018" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%203.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%203.png"/></a></figure></details></li></ul><h2 id="d27f78f7-3ff4-4b69-b1ad-ea9ee3061902" class="">example cluster</h2><ul id="143b29bb-71d6-405e-a7ba-beac453ed7bb" class="bulleted-list"><li>master nodes resources is important but it need less resources bec it has less work load</li></ul><p id="6871e521-3466-48fa-8b3f-49fa7e4059c9" class="">
+</p><h2 id="7f658d25-d631-4363-b692-76fda470acb9" class="">MiniKube</h2><div id="c89f77ad-4771-4d4b-97d0-4800c87aad51" class="column-list"><div id="b810ee9e-ebbe-4324-b84e-8df3f6d82615" style="width:20%" class="column"><ul id="d6ddea32-bd15-4dbe-bba2-b5adc41296c0" class="bulleted-list"><li>a one node cluster</li></ul></div><div id="d23e266f-4a38-421c-8c31-a3e9e5a31cf1" style="width:20%" class="column"><ul id="e38c8855-268b-48c4-a895-77d5f48bdc7b" class="bulleted-list"><li>used to test locally</li></ul></div><div id="2f53c43f-e2d6-4e8f-857e-c9a91a32d3f4" style="width:20%" class="column"><ul id="d7421e7a-e72b-4fb8-a86f-7aa576c62caf" class="bulleted-list"><li>for testing purposes</li></ul></div><div id="2a170930-1536-4a66-8a91-42f63db1838b" style="width:20%" class="column"><ul id="b722f24c-9607-4558-b578-1a63b4aa6621" class="bulleted-list"><li>creates a virtual box on your machine </li></ul></div><div id="1aaeb83e-107c-48d4-9c55-5338ac14cfa0" style="width:20%" class="column"><ul id="fd1ca170-b224-450a-a2c6-db8643e7da4b" class="bulleted-list"><li>node runs in that vbox</li></ul></div></div><ul id="cd5c1ccc-f4f1-40b0-a0c0-9778247e75e3" class="bulleted-list"><li>we have master node and working node on the same machine</li></ul><h2 id="b5446f3c-2c67-49bc-9bf8-37cc4cf1c3cd" class="">kubectl</h2><p id="84b3689a-93cd-4a42-b0db-f52e49dfd4d2" class="">we need to interact with <code>api Server</code> either using UI, api or CLI ⇒ <code>kubectl</code> and its the most powerful one</p><ul id="362ed3d1-cebb-469b-85b7-fcaf3a7f4b5b" class="bulleted-list"><li>used in minikube and cloud clusters as well</li></ul><h2 id="054ef78a-424c-4b2b-9a32-c901b6c9e5bb" class="">minikube installation on ubuntu</h2><p id="c99662f3-f2a4-47b8-95e0-4aefeac1c79f" class=""><a href="https://phoenixnap.com/kb/install-minikube-on-ubuntu">link</a></p><h1 id="7c986494-70a5-4c15-bae9-589f93be87db" class="">kubectl basic commands</h1><h2 id="8980c8d5-77e9-4009-8cba-2a0ec485c7de" class="">create</h2><ul id="212d4f3c-3066-43bd-a2e1-417bb54eaeba" class="bulleted-list"><li>pods are the smallest unit of k8s</li></ul><ul id="d12cc7d2-6afb-4747-89ae-03a6c3f637b8" class="bulleted-list"><li>using <code>kubectl</code> you won&#x27;t create <code>pods</code> but <code>deployment</code> which is an abstraction over pods</li></ul><pre id="50332a47-5743-4cca-a43c-4dd151958279" class="code"><code>kubectl create deployment NAME --image=image [--dry-run] [options]</code></pre><h3 id="8ee7b259-7eda-4dc2-b895-b2522d060ffc" class=""><a href="https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-zsh/">configure kubectl with zsh</a></h3><h3 id="34926765-ef94-4bc6-80ac-8a1b8ea3a0f5" class="">example</h3><p id="7bbea657-d7fa-4b5e-a12a-ab185ce44740" class="">what happens when we run</p><pre id="d1b992ee-608d-4169-8e7a-f0132dbd9303" class="code"><code>kubectl create deployment nginx-depl --image=nginx
+</code></pre><p id="982621b1-20fa-496d-97dd-d97a232a2615" class="">there&#x27;s a middle layer between <code>deployment </code> and <code>pod</code> which is <code>replicaset </code> which creates the replicas for the pod</p><p id="72107803-d763-47b2-ac98-352aa68d7b4e" class="">deployment has such as the blueprint for creating pod and its replica</p><p id="c3dacddc-9478-4322-9077-9a57cc1635f0" class="">the previous example is minimalistic providing <code>name</code> and <code>image</code> only and the rest is set by default</p><p id="89ddfeec-b46a-45b9-bd03-e5e8779de165" class="">in real life yopu won&#x27;t need to deal with <code>replicaset</code> but <code>deployment</code></p><ul id="e55d7319-31e7-4d29-8018-03021ddf0702" class="bulleted-list"><li>if we run</li></ul><pre id="d41f5686-f626-465a-9591-3bc5f274a421" class="code"><code>&gt; $ k get pods
+	&gt; nginx-depl-5c8bf76b5b-mp6hz
+&gt; $ k get replicaset
+	&gt;nginx-depl-5c8bf76b5b 
+</code></pre><ul id="62be1bea-85f2-420e-8054-8479891fa8ee" class="bulleted-list"><li>in the previous example we have only one replica for the pod</li></ul><ul id="15737f8b-58c5-4f15-b5b7-f33f50351424" class="bulleted-list"><li>we can see that the pod gets its id by prefix <code>name</code> of deployment then<code> hash</code> from <code>replica</code> then <code>hash</code> for <code>pod</code> </li></ul><h2 id="31639259-1165-4889-8ea4-d8bc72e89d08" class="">layers of abstractions</h2><ul id="882f7c79-4ec3-4fdd-a171-a532fe86c6eb" class="bulleted-list"><li>deployment manages a replicaset</li></ul><ul id="e8c097ca-34ff-43b2-84c8-bb79e707d26e" class="bulleted-list"><li>a replicaset manages all replicas of that pod</li></ul><ul id="69b13685-75dd-472c-8f0b-a61ca0088d92" class="bulleted-list"><li>pod is an abstraction of a container</li></ul><ul id="50583bc7-024b-4111-b60b-aec33780c77e" class="bulleted-list"><li>container</li></ul><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="ab577443-000e-41b7-af36-231c01769d98"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%">everything <strong><mark class="highlight-red">below</mark></strong>  deployment is handled by kubernetes, we shouldn&#x27;t have to worry about</div></figure><h2 id="c65997bf-9e63-4a3a-9307-5f7d7cff55ae" class="">debugging pods</h2><pre id="81a0ca67-7a81-4621-9325-ce615158d51d" class="code"><code>kubectl excec -it [pod name] --bin/bash</code></pre><h2 id="c806f252-9f8f-4171-8da0-23aedd87f716" class="">delete deployment and apply config file</h2><pre id="49572693-8415-44fc-957d-1db2bafa9e28" class="code"><code>kubectl delete deployment [name]</code></pre><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="26a46bf4-7509-47de-9b6a-5f22e9efcb58"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%">all CRUD happens on the deployment level and all underneath follows </div></figure><h3 id="879bbf6c-f93a-4722-b4a4-f1a5fb6f6ac1" class="">we deal with files for config </h3><pre id="d24442d8-55eb-4b60-8eec-5f48096fe90f" class="code"><code>kubectl apply -f [filename]</code></pre><ul id="894221bf-62ea-4555-98ba-20f1778052cf" class="bulleted-list"><li>here&#x27;s a code snippet for config file for nginx</li></ul><pre id="6b8e6464-d99c-4428-ba19-ac56173aa1f9" class="code"><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec: # specs of deployment 
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec: # specs for the pod
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80</code></pre><ul id="2481dbfb-8201-46de-8ed0-3c97b7b16916" class="bulleted-list"><li>run this by running <code>kubectl apply -f [filename]</code></li></ul><h3 id="e57c5271-0dae-4c4c-805d-1bee35b3e9c1" class="">summary </h3><p id="80de1ff3-42de-4ccd-bb4a-0e8059993451" class="">
+</p><figure id="f157660e-5c2d-4164-9c78-de5398931e98" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%204.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%204.png"/></a></figure><p id="c3a60279-a9ea-45cf-85c7-99bbf3fda33e" class="">
+</p><figure id="57c6f972-73e7-479a-9800-ef6da1af9cd2" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%205.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%205.png"/></a></figure><h2 id="41fc14d5-77fd-4733-938b-8574a07acb6c" class="">YAML config files</h2><ul id="8a5e3548-60ba-4ce0-8b99-6a5c635c9b66" class="bulleted-list"><li>each configuration has 3 parts<ol id="fa26a462-8b9c-42c6-a2a3-391ac4b896b9" class="numbered-list" start="1"><li>Metadata </li></ol><ol id="9a09116a-fcb6-4012-b730-89e6bf9ebae7" class="numbered-list" start="2"><li>specification<ol id="e47d5b85-1b0a-40f7-ad4c-bc0338d1181b" class="numbered-list" start="1"><li>attributes of <code>spec</code> are specific to the <mark class="highlight-red">kind</mark></li></ol></li></ol><ol id="0ac0bcb0-5b01-422b-834b-feca34f049a5" class="numbered-list" start="3"><li>status<ol id="e11205a5-e698-4d31-a651-c3346e01e1cb" class="numbered-list" start="1"><li>automatically generated and added by k8s</li></ol><ol id="97943be4-46c8-48a0-babe-db0a89e6cd13" class="numbered-list" start="2"><li>Desired vs. actual<ol id="59062163-b4da-4110-b150-86be7e014843" class="numbered-list" start="1"><li>if it&#x27;s not equal k8s decides that there&#x27;s smth needs to be fixed</li></ol></li></ol><ol id="8d25b331-08f1-4218-af04-074986cff5da" class="numbered-list" start="3"><li>k8s updates status continously</li></ol><ol id="06790121-b1b9-4367-b800-6d9499ebed49" class="numbered-list" start="4"><li>where does k8sget this status data ?<ol id="60ea08c0-c5c9-48be-a64c-154fc235f629" class="numbered-list" start="1"><li><code>etcd</code> the cluster brain</li></ol><ol id="f4136f9f-f10f-4b19-8042-ab583111d492" class="numbered-list" start="2"><li><code>etcd</code> holds at anytime current status of any k8s component</li></ol></li></ol></li></ol></li></ul><ul id="0c8330a6-6423-4f70-ba53-d3d9ee14db4e" class="bulleted-list"><li>is indentation strict</li></ul><ul id="af4cd02f-2701-44c4-bf20-55b8374afecc" class="bulleted-list"><li>store the config with your code or their own repo</li></ul><ul id="e7de84d2-45db-4a09-b588-f0a4f3771c52" class="bulleted-list"><li></li></ul><p id="03f17262-0814-473f-b198-22eb584303c7" class="">
+</p><figure id="11b1e9a9-ae00-4c53-87cf-07db2f8519f0" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%206.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%206.png"/></a></figure><ul id="ae37a9f8-84cf-4230-be47-a3164ce18346" class="bulleted-list"><li>which port to access the service</li></ul><ul id="6fca3285-e12e-41e3-9ec5-26ed7e5208a1" class="bulleted-list"><li>which <code>targetport</code> to forward requests to - configured in pod -  and should match container port</li></ul><figure id="e065b0c0-a0ac-41ce-9fba-40bbc87dd1af" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%207.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%207.png"/></a></figure><h2 id="2a8f5eaa-6529-4739-a0a2-35b11095fb79" class="">we have types for secrets</h2><ul id="c4d5cb34-4522-419d-80e6-b3dbe118e670" class="bulleted-list"><li>must probably we use the default one with is Opaque </li></ul><p id="a17e9306-f1d8-4c6a-b3ba-162fcdc286ec" class="">
+</p><figure id="d2e6c3b0-3111-4d79-94ad-20fc8004be06" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%208.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%208.png"/></a></figure><p id="9197cd71-0c16-4794-852c-0372c353599e" class="">
+</p><figure id="766700ad-610f-4839-8e23-6bcceb27dc39" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%209.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%209.png"/></a></figure><ul id="153437fb-ebf3-4bd0-9c99-f7402974c76a" class="bulleted-list"><li>we must create secret before deployment if the deployment refers to it</li></ul><p id="a9662da6-c61a-437b-9ef3-6937367a922e" class="">
+</p><figure id="6cd4e81d-3cfe-4755-bc75-e1cd1eb891b9" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2010.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2010.png"/></a></figure><h1 id="28420c03-80c8-45a4-9531-a0f837a2a491" class="">organizing components using namespaces</h1><ul id="2cfba3ca-bf47-4c97-bb16-3e2f2fa2a664" class="bulleted-list"><li>organize resouces in namespaces</li></ul><ul id="43354815-6ecb-4d0e-aae6-7cbe05e70050" class="bulleted-list"><li>virtual cluster inside cluster</li></ul><ul id="7a6d82e9-b3f1-4bfb-8b76-c637d6fa3541" class="bulleted-list"><li>4 namespaces by default<ul id="8f83a096-c3d2-406b-815f-7adfa40c1423" class="bulleted-list"><li></li></ul><pre id="8e81807a-de1a-422e-9315-5776a597c7a3" class="code"><code>$ kubectl get namespaces
+&gt; default           Active   41h
+	kube-node-lease   Active   41h
+	kube-public       Active   41h
+	kube-system       Active   41h</code></pre><ul id="9522c5ef-2411-4d2a-98ac-e5d6e784c138" class="bulleted-list"><li>kubesystem<ul id="c22b2b63-7180-4a9f-8515-6c111401f96e" class="bulleted-list"><li>don&#x27;t  createor modify in <code>kube-system</code></li></ul><ul id="09175ecf-2436-422b-8a47-ea0ac4677db2" class="bulleted-list"><li>system processes</li></ul><ul id="1d809628-32a3-412d-bec1-5c019d98cfb6" class="bulleted-list"><li>master and kubectl processes</li></ul></li></ul><ul id="fb0e65ea-924a-42df-ad5c-b23f77547c21" class="bulleted-list"><li>kube-public<ul id="e594b72b-3a59-4419-8158-01fa080c38b7" class="bulleted-list"><li>publically accessable data</li></ul><ul id="e37dfd82-7891-46cb-9e20-20228bdee948" class="bulleted-list"><li>configmap that contains cluster information accessable even without authentication</li></ul><p id="56dda033-7cef-45c9-8bf4-f18afa1e4ffb" class="">
+</p></li></ul><ul id="4f78f3ad-d631-4b7d-a419-de4b33dd805c" class="bulleted-list"><li>kube-node-lease<ul id="cee65f96-ac68-41ec-bb4d-fdd7e30a4718" class="bulleted-list"><li>heart beats of the nodes</li></ul><ul id="a8c66a8e-0e5d-42d8-baad-a602067cc087" class="bulleted-list"><li>each node has associated lease object in namespace</li></ul><ul id="954c7897-2424-4ec0-a500-0af10ed271c8" class="bulleted-list"><li>determines the availablity of a nodes</li></ul><p id="9dd39c78-ec79-4971-ba08-3b4964fab792" class="">
+</p></li></ul><ul id="d02253d2-4c43-40bc-bd94-31b2d53f91b6" class="bulleted-list"><li>default namespace<ul id="3aa07435-bc26-4551-ad36-d94267120537" class="bulleted-list"><li>you&#x27;re gonna be using to create the resouces at the beginning  if you haven&#x27;t created one</li></ul></li></ul></li></ul><h2 id="c6ebadc8-67d0-46ad-9b19-435695295219" class="">create namespace</h2><p id="7748ddb5-7221-4d64-8db2-e36af3015913" class="">from command line</p><pre id="6143efd4-d062-4a8e-8b7d-129b95eeef58" class="code"><code>kubectl create namespace [namespace-name]</code></pre><p id="5ec05d3b-b15b-4f15-abe5-d91062819307" class="">add namespace config to file </p><pre id="f564aa74-39f2-4d78-a3cf-ced5dc9372a5" class="code"><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-configmap
+	namespace: my-namespace
+data:
+  database_url: mongodb-service</code></pre><h2 id="841b0763-01e3-423e-94a0-03edd19e8bc1" class="">why use namespace ?</h2><ol id="83ad0584-e268-4afa-8c17-32fece16a93d" class="numbered-list" start="1"><li>structure your components</li></ol><ol id="2b079283-61cb-42c4-aebb-98b151b58f6e" class="numbered-list" start="2"><li>avoid conflicts between teams</li></ol><ol id="6e6729f4-8ebc-4a40-93d5-9abc8e0fba51" class="numbered-list" start="3"><li>share services between differenet envs</li></ol><ol id="b0d151b2-8b09-48f3-8fb6-72c9643b9456" class="numbered-list" start="4"><li>acces and resouce limits on namespace level</li></ol><h3 id="218ef5cc-d5b7-440f-9a7d-076ddc0378d5" class="">characterestics </h3><ol id="3ce60134-5b47-4f90-87c1-a33aadef6d8d" class="numbered-list" start="1"><li>you can&#x27;t access most of resouces from another namespaces<ol id="e96c5164-3db0-4351-83dd-43ac84f80046" class="numbered-list" start="1"><li>each NS should create its own <code>ConfigMap </code> , <code>secret</code></li></ol></li></ol><ol id="71975ba0-1f21-4d5c-9438-cad260847347" class="numbered-list" start="2"><li>access service from another namespaces<figure id="f3de11fa-fae1-45ab-a842-06f86c7575ab" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2011.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2011.png"/></a></figure></li></ol><ol id="64404520-9228-4829-bc29-39cefcaffc26" class="numbered-list" start="3"><li>components which can&#x27;t live in namespaces<ol id="a5514ea7-13fa-4fe9-8ddc-b9f22fa33f4a" class="numbered-list" start="1"><li>live globally in cluster</li></ol><ol id="797e932e-d4fd-4293-9251-2883c02caa38" class="numbered-list" start="2"><li>can&#x27;t isolate them</li></ol><ol id="79cd77e4-8bf2-4154-b77b-902aebd17ece" class="numbered-list" start="3"><li>example : <code>volume</code> <code>node</code></li></ol></li></ol><ul id="d597ed80-87cf-4ea3-a911-ad9c7214da47" class="bulleted-list"><li>you can list components that not bound to namespace or bound<pre id="7c2348f3-6754-4893-aa92-0d5094da6d72" class="code"><code>kubectl api-resouces --namespace=[false | true]</code></pre></li></ul><h2 id="ac90a40a-fda2-46db-a643-30e6dc646274" class="">create components in namespace</h2><ul id="8b00eb8e-2446-41ae-8eba-6222bd15d67d" class="bulleted-list"><li>if you don&#x27;t apply namepsace in config it will be in the default namespace</li></ul><ul id="18258ba5-31e3-43d2-9492-ce8d50700164" class="bulleted-list"><li>can be done using <code>--namespace= </code> or in file in <code>metadata</code></li></ul><ul id="23628513-d262-4c30-9d52-0f8190fa5495" class="bulleted-list"><li>you can change active namespace using tool <code><strong>kubens</strong></code></li></ul><h1 id="be0cc351-2145-4e49-81a1-a7b171c757db" class="">K8S ingress</h1><h2 id="6f4dd4d2-f692-4b94-a862-3f511a1a1a14" class="">minikube config</h2><pre id="11dcd96d-1510-404b-b0b2-dcba14eb695d" class="code"><code>minikube addons enable ingress </code></pre><p id="f5b957f5-6587-4629-a36d-ee2aef7c5773" class="">this command automatically  starts k8s Nginx  implementation of  Ingress controller</p><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="aaecf85c-fa1b-4e24-9f39-36d2200e0e6c"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%">TBD complete ingress docs</div></figure><hr id="d0fd6917-309c-406b-85cc-3f0c6ff93088"/><h1 id="81d40dda-f089-4f85-bd46-649087589288" class="">HELM</h1><p id="d34cc3a5-cff5-434f-9967-2de75485c698" class="">package manager for k8s</p><p id="517946bf-85c8-4fbe-b979-8adfcc4cb0c6" class="">templating engine</p><p id="814764bf-a05d-4d66-85dc-b11b9ba2c685" class="">
+</p><figure id="3dafc4f7-33f0-4e65-a7bd-fec8f519c051" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2012.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2012.png"/></a></figure><p id="6059205c-91e5-4f49-85ed-e3f5b2485dfa" class="">deploying same app across diff envs</p><h2 id="f3480db6-6c61-44e7-8e68-42e633579e88" class="">helm chart structure</h2><ul id="58cb4b57-3a85-48d0-b053-479817f09cc0" class="bulleted-list"><li>values.yaml has the default values and can be overriden</li></ul><p id="3cfbbcd5-7764-430b-8c2d-5ebabe940938" class="">
+</p><figure id="99b886fe-6056-44e9-b950-f1516a0c5b72" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2013.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2013.png"/></a></figure><ul id="86c48514-004a-4adc-a4a4-a58be9ce7e3a" class="bulleted-list"><li>release management<ul id="8d0a3f1c-97fb-4e95-8984-aed6b4205ea5" class="bulleted-list"><li>tiller<ul id="9e4417eb-87a2-47b0-a646-6300ba9034cd" class="bulleted-list"><li>downside security</li></ul></li></ul></li></ul><h1 id="f2d082da-2350-4218-886d-c0b5c0f20b48" class="">k8s Volumes</h1><ul id="423fd2ae-94f8-42fa-972b-928dc2c46ead" class="bulleted-list"><li>persistent volume</li></ul><ul id="906ca532-8e37-4c00-adfb-098addbf318b" class="bulleted-list"><li>persistent volume claim</li></ul><ul id="40b15251-71e0-4e28-891a-1d5b33b2cfd7" class="bulleted-list"><li>storage class</li></ul><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="d238b7ae-3b5e-42e5-97a7-6b20c2d2703a"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%">you need to explicility configure volumes to persist data because k8s doesn&#x27;t provide that by default</div></figure><ol id="29cf6b1b-d0c0-423b-be36-58d519c00e7c" class="numbered-list" start="1"><li>we need a storage that doesn&#x27;t depend on pod lifecycle</li></ol><ol id="bc93735b-8c0c-4ff9-a068-6e5cf50376c5" class="numbered-list" start="2"><li>storage must be available on all nodes bec, we don&#x27;t know on which node it will start</li></ol><ol id="989db82f-fc80-4e9a-b5b7-d6ccd6a21a79" class="numbered-list" start="3"><li>storage needs to survive even if the cluster crash</li></ol><ul id="b304d03e-abeb-4af2-b96e-92ab1f39fc59" class="bulleted-list"><li>cluster resource</li></ul><ul id="2721727e-64f2-449c-897a-3883ed0c41e5" class="bulleted-list"><li>created via yaml file</li></ul><ul id="ab11a16c-4336-45af-a639-b4204022f1d3" class="bulleted-list"><li>we need physical storage</li></ul><ul id="efacde09-8624-403e-b6d8-affc822e0155" class="bulleted-list"><li>what type of storage you need ?</li></ul><ul id="ec3f7abb-1370-44fb-8f48-2dc2cb8ab570" class="bulleted-list"><li>you have to manage and create them by yourself</li></ul><ul id="ec308939-71b8-46a3-9bf6-ae1589624b97" class="bulleted-list"><li>k8s gives you an interface for persistant data and you have to provide the actual storage<figure id="057b233d-76a1-429b-b167-9c8bd35f9e8a" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2014.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2014.png"/></a></figure></li></ul><ul id="3ac86c64-0413-40a0-8285-82f90f14ebce" class="bulleted-list"><li>PV are not namespaced, available to all namespaces</li></ul><ul id="f00c4d9d-2aed-4a31-a1d9-f8904effbf4e" class="bulleted-list"><li></li></ul><h2 id="a33661de-82cc-4169-b0b2-d46cc25ad2ff" class="">local vs remote  volume</h2><ul id="1ca1ed20-c071-45d9-83bd-7ad94a14e8c1" class="bulleted-list"><li>each has its own use case</li></ul><ul id="cd446ea3-0803-4039-9416-66c7ffa17a45" class="bulleted-list"><li>local violates 2 and 3 requirement for data persistance:<ul id="628f853c-d861-4425-bed4-e829dc27fd5f" class="bulleted-list"><li>being tied to 1 specific node</li></ul><ul id="37eb0646-862b-4896-97dd-3f0a6b77049d" class="bulleted-list"><li>surviving in cluster crashes</li></ul><p id="43519146-4925-4674-8d8a-6979786e5c15" class="">
+</p></li></ul><ul id="d2672687-2a36-48ef-8c68-c6b87553c2cb" class="bulleted-list"><li>for DB persistance use remote</li></ul><h2 id="d7a0e287-887c-4bf4-93c5-a4c954dc85b0" class="">who creates and when ?</h2><ul id="822fc4f5-4d0a-49fc-bae0-1a0cefd867f5" class="bulleted-list"><li>it has to be there before the pod that depends on it created</li></ul><ul id="bdc11acd-a5bb-4f80-a412-fa04b1b3a88d" class="bulleted-list"><li>K8S admin creates it</li></ul><ul id="7beb2594-274f-4d9f-b1c7-4a8f6c1242dd" class="bulleted-list"><li>k8s users -devs and devops- has to claims the storage using <code>persistanceVolumeClaim</code> </li></ul><ul id="09391a24-3693-4eb6-9dc4-4ebe6cca45ac" class="bulleted-list"><li>claims must be in the same namespace</li></ul><ul id="359caca9-fbc5-44f3-a29d-bfd26c6824bf" class="bulleted-list"><li>volume is mounted to the pod then it can be mounted into the container</li></ul><ul id="44218741-45b3-4aaa-bc24-2e26cfc0636e" class="bulleted-list"><li>you can create configMap or secret and mount it as volume</li></ul><h2 id="905aaf21-082a-4bf8-96a3-2ccf709af964" class="">storage class</h2><p id="a11d66e4-d691-4c38-b754-2477ce7b5419" class="">
+</p><figure id="d952baba-70e9-4272-90df-205ba1f37621" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2015.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2015.png"/></a></figure><h1 id="b3cff70f-896d-4798-8e76-e8f34e9b80ba" class="">statefulSet for stateful applications</h1><ul id="5d56d6b0-0947-456c-b0e3-bbc289eab380" class="bulleted-list"><li>scalling</li></ul><ul id="03882188-e552-4f65-9260-059dd0629f32" class="bulleted-list"><li>one master and other slaves</li></ul><ul id="ef8312cd-6d1a-4d03-a732-3683cedb3394" class="bulleted-list"><li>have access to the same data but not the same persistant volumes</li></ul><p id="112dafa9-1166-42a9-ab82-cc911520794e" class="">
+</p><figure id="399cb68d-ea0d-41e0-a0e4-9e5b8f5aabbc" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2016.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2016.png"/></a></figure><h1 id="3c500380-e6b8-4576-904a-51229d15e733" class="">k8s services</h1><h2 id="45aa1810-1c1b-40cf-92f6-99689438b61b" class="">what and why ?</h2><ul id="e490eb53-34e9-4651-a7ff-dfb651b6d754" class="bulleted-list"><li>each pod has its own ip address<ul id="080c8288-7848-4273-901e-e4c63c32b2ab" class="bulleted-list"><li>pods are ephermal- are destroyed frequently</li></ul></li></ul><ul id="7da92df2-9cda-4abc-90d4-f373ebe867ad" class="bulleted-list"><li>service <ul id="f3cb27eb-6b94-4010-96ef-db49bd6c0baa" class="bulleted-list"><li>is stable</li></ul><ul id="7559edbe-ba1b-4061-a933-b27ef433ee73" class="bulleted-list"><li>loadbalancing</li></ul><ul id="7f119850-2e09-4b22-bfd9-f4d20ac75655" class="bulleted-list"><li>loose coupling</li></ul><ul id="194e2f40-3369-42fd-9e35-5b0620cd7661" class="bulleted-list"><li>within and outside cluster</li></ul><ul id="6e87e56d-9406-48cd-8d05-1d4d89394c3e" class="bulleted-list"><li></li></ul></li></ul><h2 id="e4db47b0-33c0-48b7-8988-6f20e77da40e" class="">clusterIP services</h2><ul id="2b5c63c1-126a-4fb4-9ce2-0d88f9b55a2b" class="bulleted-list"><li>default type</li></ul><ul id="36714943-065b-4572-a893-e74477cb1e97" class="bulleted-list"><li></li></ul><figure id="69e194b4-924f-4d5c-afb8-a63ff5fbe190" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2017.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2017.png"/></a></figure><h3 id="59bddae3-a567-4f29-a618-d5a406e95fff" class="">service communication : selector</h3><ul id="87032089-24f1-4389-9f64-14faf4c35a36" class="bulleted-list"><li>which pods to forward the request to ?<ul id="4dd33fd0-4d50-41d6-8916-311f6bbef6d6" class="bulleted-list"><li>using selectors</li></ul><ul id="eea4fbfc-817d-450d-84a6-da60f1c5e63c" class="bulleted-list"><li>key value pairs</li></ul><ul id="9e041172-8450-46c9-be40-01c46068858b" class="bulleted-list"><li>labels of pods</li></ul></li></ul><ul id="7acfe959-bc37-4847-9424-f60d09389290" class="bulleted-list"><li>pods with multiple ports?<ul id="c1281fcf-1acb-4d15-8bd3-68d59b72330f" class="bulleted-list"><li>with <code>targetPort</code> attribute</li></ul></li></ul><ul id="3c73dd9b-0756-4387-bd8f-004f346e2907" class="bulleted-list"><li>k8s creates <code>endpoint object</code> <ul id="5b5def37-7d6c-44f5-a905-4db2a11698b2" class="bulleted-list"><li>same name as service</li></ul><ul id="1db712d9-76b2-4c6f-b5e3-848ce8f28df0" class="bulleted-list"><li>keeps track of the members/endpoints of the service</li></ul></li></ul><ul id="3c1c8e52-74b8-49e5-9139-1fb8468a82a1" class="bulleted-list"><li>service port is arbitary </li></ul><ul id="261aef28-cd66-431b-9f8d-1da3ec0edcc4" class="bulleted-list"><li>target port must match the port, the container listening to </li></ul><ul id="27159418-f2e1-43a6-bdaa-557934fd8e88" class="bulleted-list"><li></li></ul><h3 id="822ddbfb-4242-4ac7-86c1-e2f46bff3172" class="">multiple port services</h3><ul id="dfc01eff-bc49-4a27-908b-5d48023817c5" class="bulleted-list"><li>in case you have 2 things to connect to in the same pod and with different ports</li></ul><ul id="1d52d88c-fdbd-45bb-b151-5a47376307e6" class="bulleted-list"><li>you have to name the ports</li></ul><ul id="77944d29-10b1-4071-bd28-c7ecd4ef5b94" class="bulleted-list"><li></li></ul><figure id="50492535-2425-4ded-875d-c3ca94485237" class="image"><a href="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2018.png"><img style="width:1920px" src="kubernetes%20crash%20course%20fd17989ab85d4536aa18bb784813440f/Untitled%2018.png"/></a></figure><h2 id="a95114e8-cc39-4a2b-9f36-b9141e4b99e9" class="">headless service</h2><ul id="1f6c120e-9624-49d1-bd77-203149d8a5a9" class="bulleted-list"><li>client want to communicate with specific pod</li></ul><ul id="6c568526-2fe8-4926-aa64-fdca5a506a19" class="bulleted-list"><li>pods want to communicate with specific pod</li></ul><ul id="b3cf81b5-c693-47db-a938-bcd3c9acc902" class="bulleted-list"><li>use cases<ul id="7eb0f868-cbcb-472d-870b-ea6abc8afc47" class="bulleted-list"><li>stateful apps</li></ul><ul id="41d495f6-3609-45f7-aad4-ec83d4f4733e" class="bulleted-list"><li>pods are not identical</li></ul></li></ul><ul id="97c2e4b6-6d06-4282-b9cf-6db23996c66e" class="bulleted-list"><li>we have 2 options<ol id="5b9ce473-5c33-42cb-8ba3-3c664bce9616" class="numbered-list" start="1"><li>API call to k8s api server?<ol id="4ece47a2-ca59-409b-8b41-88fa561e5f4b" class="numbered-list" start="1"><li>inefficient</li></ol><ol id="8327216f-c84c-4d6c-b93a-a4e6773f992c" class="numbered-list" start="2"><li>make app too tied to k8s api</li></ol></li></ol><ol id="b4b16624-a8f4-4182-b4c0-b5aba20fbf45" class="numbered-list" start="2"><li><strong><mark class="highlight-red">DNS look up</mark></strong><ol id="63d0a9b5-a0f7-4b92-9c48-7cb4e21e3a6e" class="numbered-list" start="1"><li>DNS  lookup for service ip - returns single ip of ClusterIP</li></ol><ol id="81dbd5ad-7518-4d20-afa2-c38a017047f0" class="numbered-list" start="2"><li>set  <code>ClusterIp</code> to <code>none </code> - returns the <strong>Pod Ip address </strong>instead</li></ol></li></ol><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="961a7902-69f0-4fd4-a0e4-f6cad45ac163"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%">when we deploy stateful app we have the <code>clusterIp </code> which do the load balancing and reach any of the pods in case we don&#x27;t need a specific pod
+but when we need to take to a specific pod in case of writing for example we want to write to the master node only  we have <code>headless service</code></div></figure></li></ul><h2 id="da288a47-bf57-4889-ba97-9a6d136acf95" class="">NodePort service</h2><ul id="8a46a05a-889e-41e8-837f-34e2990d7516" class="bulleted-list"><li>when we need to use ip from outside the cluster </li></ul><ul id="c3e6756b-fc7b-45b8-9a71-6210786e7ed4" class="bulleted-list"><li><code>clusterIp </code> is automatically created</li></ul><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="fa9fdb1b-26b2-47c4-ba5e-01c7fb1828e3"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%"> we have range : 30000 - 32767 only</div></figure><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="8c1714da-5579-4f14-84fb-6163687cb0f9"><div style="font-size:1.5em"><span class="icon">‼️</span></div><div style="width:100%">not secure - not for production</div></figure><h2 id="9c0aa582-0e9d-4d28-90d1-1f63fd18a7f9" class="">load Balancer service</h2><ul id="516afcdc-bc1d-4015-8f7d-a3f13dcf63f0" class="bulleted-list"><li><code>clusterIp </code> and <code>NodePort</code> are automatically created by k8s, in which external loadbalancer of cloud will route the traffic to</li></ul><ul id="0b82c31e-69a8-495e-8677-8a31cd1a6c85" class="bulleted-list"><li>extenstion of NodePort which is extension of Cluster IP</li></ul></div></article></body></html>
